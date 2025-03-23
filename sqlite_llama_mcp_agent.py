@@ -157,6 +157,24 @@ async def agent_loop(query: str, tools: dict, messages: List[dict] = None):
             )
             # Call the tool with the arguments using our callable initialized in the tools dict
             tool_result = await tools[tool_call.function.name]["callable"](**arguments)
+
+            # Add the respone for assistant
+            pre_tool_result = {
+                "role": "assistant",
+                "content": None,
+                "tool_calls": [
+                    {
+                        "id": tool_call.id,
+                        "type": "function",
+                        "function": {
+                            "name": tool_call.function.name,
+                            "arguments": tool_call.function.arguments,
+                        }
+                    }
+                ]
+            }
+            messages.append(pre_tool_result)
+            
             # Add the tool result to the messages list
             messages.append(
                 {
